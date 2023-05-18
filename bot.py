@@ -21,12 +21,20 @@ def Name(path = 'imgs/downloads/', name = 'img'):
     return path + '/' + Name
 
 def Last_Name(path = 'imgs/result', name = 'img'):
+    def num_in_str(str):
+        num = ''
+        for s in str.split('.')[0][::-1]:
+            if s in '0123456789':
+                num += s
+            else:
+                break
+        return int(num[::-1])
     out, num = listdir(path)[0], 0
     for file in listdir(path)[1:]:
         if file.startswith(name):
             if file.split('.')[0][-1] in '0123456789':
-                if int(file.split('.')[0][-1]) >= num:
-                    out = file
+                if int(num_in_str(file.split('.')[0])) >= num:
+                    out, num = file, int(num_in_str(file.split('.')[0]))
     return path + '/' + out
 
 def clear(*paths):
@@ -47,19 +55,15 @@ async def process_start_command(message: types.Message):
 async def process_help_command(message: types.Message):
     await message.reply('Send me any photo\nand I\'ll send you telegram-sticker-format image!\n\n!note: Please don\'t allow group items to better experiance\nAlso don\'t send more than 10 files at once')
 
-@dp.message_handler(content_types=['photo'])
-async def photo_handler(msg: types.Document):
-    file_id = ''
-    count = 0
-    for i in range(len(msg.photo)):
-        file_id1 = msg.photo[-1]['file_unique_id'] + msg.photo[-1]['file_id']
-        if file_id != file_id1:
-            name = Name()
-            await msg.photo[-1].download(name)
-            WI(name).Save(True, path='imgs/result/', exst='png')
-            await msg.reply_document(open(Last_Name(), 'rb'))
-        file_id = file_id1
-        count += 1
+@dp.message_handler(content_types=['document', 'photo'])
+async def photo_handler(msg: types.Message):
+    name = Name()
+    if msg.content_type == 'photo':
+        await msg.photo[-1].download(name)
+    else:
+        await msg.document.download(name)
+    WI(name).Save(True, path='imgs/result/', exst='png')
+    await msg.reply_document(open(Last_Name(), 'rb'))
 
 @dp.message_handler(commands=['clear', 'clear cache', 'cache', 'clear history', 'history'])
 async def process_clear_command(message: types.Message):
