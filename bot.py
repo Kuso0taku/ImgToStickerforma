@@ -48,7 +48,7 @@ async def process_help_command(message: types.Message):
     await message.reply('Send me any photo\nand I\'ll send you telegram-sticker-format image!\n\n!note: Please don\'t allow group items to better experiance\nAlso don\'t send more than 10 files at once')
 
 @dp.message_handler(content_types=['photo'])
-async def photo_handler(msg: types.Document):
+async def photo_handler(msg: types.Message):
     file_id = ''
     count = 0
     for i in range(len(msg.photo)):
